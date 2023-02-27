@@ -154,3 +154,14 @@ def init_policy(env):
     """
     policy = np.ones([env.num_states,env.num_actions],dtype=float)*1/env.num_actions
     return policy
+
+def init_Q(env):
+    """
+    Returns an initialized policy 2D array for Q learning and SARSA
+    Args:
+        env (GridWorld object): The MDP environment object provided by gridworld.py
+    Returns:
+        policy (numpy.array): Initial policy array
+    """
+    Q = np.zeros([env.num_states,env.num_actions],dtype=float)*1/env.num_actions
+    return Q
