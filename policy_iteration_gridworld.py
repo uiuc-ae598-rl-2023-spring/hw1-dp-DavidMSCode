@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import gridworld
 import copy
-from gridfuncs import plot_gridworld, new_policy, init_V, init_policy
+from RLSharedFunctions import plot_gridworld, new_policy, init_V, init_policy, plotMeanV
 
 
 def Bellman(env,policy,V,s,discount):
@@ -86,10 +86,10 @@ def policy_improvement(env,V,policy,discount):
             policy_is_stable = False
     return (policy, policy_is_stable)
 
-def main():
-    #parameters
-    discount = 0.95
-    tol = 1e-3
+def PIGridworld(discount=0.95,tol=1e-3):
+    """Runs policy iteration to find the policy and value function for Gridworld
+    """
+
     # Create environment
     env = gridworld.GridWorld(hard_version=False)
 
@@ -98,42 +98,22 @@ def main():
     count = 0
     policy_is_stable = False
     policy = init_policy(env)
+    meanV = [0]
     while not policy_is_stable:
         #loop through policy eval and policy improvement until policy stabilizes
         V = policy_evaluation(env, policy, discount, tol)
-        # if count==0:
-        #     plot_gridworld(V,policy,[5,-1])
         policy, policy_is_stable = policy_improvement(env,V, policy, discount)
+        meanV.append(sum(V)/25)
         count+=1
 
-    plot_gridworld(V,policy,[5,-1])
-    plt.show()
-    # Create log to store data from simulation
-    log = {
-        't': [0],
-        's': [s],
-        'a': [],
-        'r': [],
-    }
-
-    # Simulate until episode is done
-    done = False
-    while not done:
-        a = np.argmax(policy[s])
-        (s, r, done) = env.step(a)
-        log['t'].append(log['t'][-1] + 1)
-        log['s'].append(s)
-        log['a'].append(a)
-        log['r'].append(r)
-
-    # Plot data and save to png file
-    plt.plot(log['t'], log['s'])
-    plt.plot(log['t'][:-1], log['a'])
-    plt.plot(log['t'][:-1], log['r'])
-    plt.legend(['s', 'a', 'r'])
-    plt.savefig('figures/gridworld/test_gridworld.png')
+    return (env,policy,V,meanV)
 
 
 if __name__ == '__main__':
-    main()
+        #parameters
+    discount = 0.95
+    tol = 1e-3
+    env, policy, V, meanV = PIGridworld(discount = 0.95, tol = 1e-3)
+    plot_gridworld(V,policy,(5,-1),"Policy Iteration")
+    plotMeanV(meanV,"Policy Iteration Learning Curve")
 # %%

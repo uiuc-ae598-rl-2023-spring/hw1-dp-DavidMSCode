@@ -1,16 +1,25 @@
-# %%
-import random
-import numpy as np
-import matplotlib.pyplot as plt
-import gridworld
-from RLSharedFunctions import init_Q, epsilonGreedy, init_V, QtoPolicy, plot_gridworld, plotLog, runGridworldEpisode, PlotLearningCurve, TD0ValueEstimate
 
+import numpy as np
+import discrete_pendulum
+from RLSharedFunctions import init_Q, epsilonGreedy, init_V, QtoPolicy, plot_gridworld, runPendulumEpisode, plotLog, PlotLearningCurve
+
+def TD0ValueEstimate(env,policy,alf,discount,max_episodes):
+    V = init_V(env)
+    for i in np.arange(0,max_episodes):
+        s = env.reset()
+        done = False
+        while not done:
+            a = np.argmax(policy[s])
+            (s1, r, done) = env.step(a)                     #transition to next state
+            V[s] = V[s] + alf*(r + discount*V[s1]-V[s])  #update Q with SARSA
+            s=s1
+    return V
 
 def SARSA_episode(env,Q,alf,epsi,discount):
     """
-    Simulates 1 episode of the gridworld while running SARSA
+    Simulates 1 episode of the discretized pendulum while running SARSA
     Args:
-        env (GridWorld): The MDP environment object provided by gridworld.py
+        env (environment): The MDP environment object provided by pendulum.py
         Q (numpy.array): a 2D array of state action pair values
         alf (float): Step size (0,1] for adjusting Q
         epsi (float): The chance (0-1) of exploring rather than taking the greedy action
@@ -27,6 +36,8 @@ def SARSA_episode(env,Q,alf,epsi,discount):
         's': [s],
         'a': [],
         'r': [],
+        'theta': [env.x[0]],        # agent does not have access to this, but helpful for display
+        'thetadot': [env.x[1]],     # agent does not have access to this, but helpful for display
     }
     # Simulate until episode is done
     done = False
@@ -43,13 +54,15 @@ def SARSA_episode(env,Q,alf,epsi,discount):
         log['s'].append(s)
         log['a'].append(a)
         log['r'].append(r)
+        log['theta'].append(env.x[0])
+        log['thetadot'].append(env.x[1])
     return (Q,log)
 
-def SARSA(env, alf, epsi, discount,max_episodes):
+def SARSA(env, alf, epsi0, discount,max_episodes=5000):
     """
     Chooses an action optimally with a small chance of choosing a random action
     Args:
-        env (GridWorld): The MDP environment object provided by gridworld.py
+        env (env object): The MDP environment object provided by gridworld.py or discrete_pendulum.py
         alf (float): Step size (0,1] for adjusting Q
         epsi (float): The chance (0-1) of exploring rather than taking the greedy action
         discount (float): The discount for future step values to ensure convergance
@@ -61,6 +74,8 @@ def SARSA(env, alf, epsi, discount,max_episodes):
     Q = init_Q(env)                         #Initialize the state-action pair values 
     logs = []                               #init empty log list
     for  i in np.arange(0,max_episodes):
+        # epsi  = (1-i/max_episodes)*epsi0  #time dependent exploration
+        epsi = epsi0                        #constant exploration
         #Simulate Gridworld over the max episodes while running SARSA
         Q, log = SARSA_episode(env,Q,alf,epsi,discount)
         #store logs in list
@@ -68,25 +83,26 @@ def SARSA(env, alf, epsi, discount,max_episodes):
     return (Q,logs)
 
 
-def SARSAGridworld(alf=0.5,epsi=0.1,discount=0.95,max_episodes=5000):
-    # Create environment
-    env = gridworld.GridWorld(hard_version=False)
-
+def SARSAPendulum(n_theta=31,n_theta_dot=31,alf=0.15,epsi=0.8,discount=0.95,max_episodes=2000):
+    """
+    Trains a policy for balancing a discretized pendulum using the SARSA algorithm 
+    """
+    env = discrete_pendulum.Pendulum(n_theta,n_theta_dot,31)
+    #Train with SARSA
     Q, logs = SARSA(env,alf,epsi,discount,max_episodes)
+    #Derive policy from trained Q
     policy = QtoPolicy(env,Q)
+    #Use TD(0) to calculate V
     V = TD0ValueEstimate(env,policy,alf,discount,1000)
+    
     return (env,Q,policy,V,logs)
 
-
 if __name__ == '__main__':
-    alf = 0.5           #learning step size
-    epsi = .1           #exploration chance
-    discount = 0.95     #future state pair value disc"ount
-    env,Q,policy,V,logs = SARSAGridworld(alf,epsi,discount,3000)
-    plot_gridworld(V,policy,(5,-1),title="SARSA")
-    log = runGridworldEpisode(env,policy)
-    plotLog(log,title="SARSA Gridworld Trajectory")
+    n_theta = 31
+    n_theta_dot = 31
+    (env,Q,policy,V,logs) = SARSAPendulum(n_theta,n_theta_dot,alf=0.15,epsi=0.8,discount=0.95,max_episodes=2000)
+    plot_gridworld(V,policy,(n_theta,n_theta_dot),title="SARSA Pendulum Value Function",hide_values=True,plot_arrows=False)
+    log = runPendulumEpisode(env,policy)
+    plotLog(log,title="SARSA Trained Agent Trajectory")
     PlotLearningCurve(logs,title="SARSA Learning Curve")
-
-
 # %%
