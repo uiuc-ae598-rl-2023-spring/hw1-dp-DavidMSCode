@@ -31,16 +31,16 @@ Please apply policy iteration, value iteration, SARSA, and Q-learning to the gri
 Please apply only SARSA and Q-learning to the pendulum. Again, please apply TD(0) to learn the value function associated with the optimal policy produced by SARSA and Q-learning.
 
 More specifically, please write code to generate, at a minimum, the following results:
-- A plot of the learning curve for each algorithm.
-    - For policy iteration and value iteration, plot the mean of the value function $\frac{1}{25}\sum_{s = 1}^{25} V(s)$ versus the number of *value* iterations. For policy iteration, "the number of value iterations" is the number of iterations spent on policy evaluation (which dominates the computation time). For value iteration, "the number of value iterations" is synonymous with the number of iterations of the algorithm.
-    - For SARSA and Q-learning, plot the return versus the number of episodes.
-- A plot of learning curves for several different values of $\epsilon$ for SARSA and Q-learning.
-- A plot of learning curves for several different values of $\alpha$ for SARSA and Q-learning.
-- A plot of an example trajectory for each trained agent.
-- A plot of the policy that corresponds to each trained agent.
-- A plot of the state-value function that corresponds to each trained agent (learned by TD(0) for SARSA and Q-learning).
+- [x] A plot of the learning curve for each algorithm.
+    - [x] For policy iteration and value iteration, plot the mean of the value function $\frac{1}{25}\sum_{s = 1}^{25} V(s)$ versus the number of *value* iterations. For policy iteration, "the number of value iterations" is the number of iterations spent on policy evaluation (which dominates the computation time). For value iteration, "the number of value iterations" is synonymous with the number of iterations of the algorithm.
+    - [x] For SARSA and Q-learning, plot the return versus the number of episodes.
+- [x] A plot of learning curves for several different values of $\epsilon$ for SARSA and Q-learning.
+- [x] A plot of learning curves for several different values of $\alpha$ for SARSA and Q-learning.
+- [x] A plot of an example trajectory for each trained agent.
+- [x] A plot of the policy that corresponds to each trained agent.
+- [x] A plot of the state-value function that corresponds to each trained agent (learned by TD(0) for SARSA and Q-learning).
 
-Include `train_gridworld.py` and `train_pendulum.py` files that can be run to generate all necessary plots and data.
+- [x] Include `train_gridworld.py` and `train_pendulum.py` files that can be run to generate all necessary plots and data.
 
 ## What to submit
 

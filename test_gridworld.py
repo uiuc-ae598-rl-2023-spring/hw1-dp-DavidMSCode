@@ -1,8 +1,8 @@
+# %%
 import random
 import numpy as np
 import matplotlib.pyplot as plt
 import gridworld
-
 def main():
     # Create environment
     env = gridworld.GridWorld(hard_version=False)
@@ -38,3 +38,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# %%
