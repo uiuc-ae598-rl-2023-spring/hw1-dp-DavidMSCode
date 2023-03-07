@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-
+pagewidth = 10
 def greedyAction(Q,s):
     """
     Chooses the most optimal action based on current state and the estimated q state-action value
@@ -221,7 +221,7 @@ def plotLog(log,title="Title"):
     Plots the states, actions and rewards for Qlearning and SARSA. Also the angle and velocity for the discretized pendulum
     """
     n_plots = 2 if 'theta' in log and 'thetadot' in log else 1
-    fig = plt.figure(figsize=(10, 6*n_plots))
+    fig = plt.figure(figsize=(pagewidth, pagewidth/2*n_plots))
     ax = fig.add_subplot(n_plots,1,1)
     fig.suptitle(title)
     ax.plot(log['t'], log['s'])
@@ -238,7 +238,7 @@ def plotLog(log,title="Title"):
 
 def PlotLearningCurve(logs,title="Title"):
     """Plots learning curve for SARSA and Q Learning from logs"""
-    fig = plt.figure()
+    fig = plt.figure(figsize=(pagewidth,pagewidth/2))
     max_episodes = len(logs)
     Val = np.zeros(max_episodes)
     for i in range(0,max_episodes):
@@ -251,7 +251,7 @@ def PlotLearningCurve(logs,title="Title"):
     if 'theta' in logs[0]:
         ax.set_ylim([-10, 100])
     plt.grid()
-    plt.show()
+    plt.draw()
 
 def plotMeanV(meanV,title="Title"):
     """
@@ -263,9 +263,9 @@ def plotMeanV(meanV,title="Title"):
     plt.ylabel("Mean Value Function")
     plt.title(title)
     plt.grid()
-    plt.show()
+    plt.draw()
 
-def plot_gridworld(V,policy,shape,title="Title",hide_values=False,plot_arrows=True):
+def plot_gridworld(V,policy,shape,title="Title",hide_values=False,plot_arrows=True,valueFontSize = 10):
     """
     Args:
         V (numpy array): 1D numpy array showing the value function for each state s, V[s]
@@ -274,27 +274,28 @@ def plot_gridworld(V,policy,shape,title="Title",hide_values=False,plot_arrows=Tr
     Ouput:
         A plot showing the value function and policy decisions in a gridworld
         """
-    n_plots = 2 if plot_arrows else 1
+    n_plots = 2
     if not V is None:
         #Reshape the V and policy into grids for easy plotting
         V_grid = V.reshape(shape)
         shape = V_grid.shape
         
         #Plot value estimate as an image using plt.imshow()
-        fig = plt.figure()
+        fig = plt.figure(figsize=[pagewidth,shape[0]/shape[1]*pagewidth/2])
         ax = fig.add_subplot(1,n_plots,1)
         fig.suptitle(title)
         plt.imshow(V_grid,cmap='hot')
+        plt.title("Value Function")
         ax = plt.gca()
         # Major ticks
-        ax.set_xticks(np.arange(0, shape[0], 1))
-        ax.set_yticks(np.arange(0, shape[1], 1))
+        ax.set_xticks(np.arange(0, shape[1], 1))
+        ax.set_yticks(np.arange(0, shape[0], 1))
         # Labels for major ticks
-        ax.set_xticklabels(np.arange(1, shape[0]+1, 1))
-        ax.set_yticklabels(np.arange(1, shape[1]+1, 1))
+        ax.set_xticklabels(np.arange(1, shape[1]+1, 1))
+        ax.set_yticklabels(np.arange(1, shape[0]+1, 1))
         # Minor ticks
-        ax.set_xticks(np.arange(-.5, shape[0], 1), minor=True)
-        ax.set_yticks(np.arange(-.5, shape[1], 1), minor=True)
+        ax.set_xticks(np.arange(-.5, shape[1], 1), minor=True)
+        ax.set_yticks(np.arange(-.5, shape[0], 1), minor=True)
         # Gridlines based on minor ticks
         ax.grid(which='minor', color='w', linestyle='-', linewidth=2)
         # Remove minor ticks
@@ -310,13 +311,16 @@ def plot_gridworld(V,policy,shape,title="Title",hide_values=False,plot_arrows=Tr
                 ax.text(y,x,"%.2f"%val,
                         color=c,
                         horizontalalignment="center",
-                        verticalalignment="center")
+                        verticalalignment="center",
+                        fontsize = valueFontSize)
         else:
             plt.colorbar()
     if not policy is None and  plot_arrows:
         policy_grid = policy.reshape(shape+(-1,))        
         #Plot policy directions
         ax = fig.add_subplot(1,n_plots,2)
+        ax.set_aspect('equal')
+        ax.set_title("Policy")
         # Major ticks
         ax.set_xticks(np.arange(0, shape[0], 1))
         ax.set_yticks(np.arange(-shape[1], 0, 1))
@@ -325,11 +329,14 @@ def plot_gridworld(V,policy,shape,title="Title",hide_values=False,plot_arrows=Tr
         ax.set_yticklabels(np.arange(shape[1], 0, -1))
         # Minor ticks
         ax.set_xticks(np.arange(-.5, shape[0], 1), minor=True)
-        ax.set_yticks(np.arange(-shape[1]-.5, .5, 1), minor=True)
+        ax.set_yticks(np.arange(-shape[1]+.5, .5, 1), minor=True)
         # Gridlines based on minor ticks
         ax.grid(which='minor', color='b', linestyle='-', linewidth=2)
         # Remove minor ticks
         ax.tick_params(which='minor', bottom=False, left=False)
+        # Set limits
+        ax.set_xlim([-.5, shape[0]-.5])
+        ax.set_ylim([-shape[1]-.5, -.5])
         #plot arrows for each action with any probability
         for (x,y,a), prob in np.ndenumerate(policy_grid):
             if a==0:
@@ -351,4 +358,41 @@ def plot_gridworld(V,policy,shape,title="Title",hide_values=False,plot_arrows=Tr
             if prob>0:
                 #if action has probability of ocurring under policy, plot its arrow
                 plt.arrow(y,-x-1,dx,dy,head_width = .1)
+    elif not policy is None:
+        policy_grid = policy.reshape(shape+(-1,))
+        action_grid = np.argmax(policy_grid,axis=2)  #get the best action for each policy aligned in gridspace
+        ax = fig.add_subplot(1,n_plots,2)
+        plt.imshow(action_grid,cmap='viridis')
+        plt.title("Policy")
+        ax = plt.gca()
+        # Major ticks
+        ax.set_xticks(np.arange(0, shape[1], 1))
+        ax.set_yticks(np.arange(0, shape[0], 1))
+        # Labels for major ticks
+        ax.set_xticklabels(np.arange(1, shape[1]+1, 1))
+        ax.set_yticklabels(np.arange(1, shape[0]+1, 1))
+        # Minor ticks
+        ax.set_xticks(np.arange(-.5, shape[1], 1), minor=True)
+        ax.set_yticks(np.arange(-.5, shape[0], 1), minor=True)
+        # Gridlines based on minor ticks
+        ax.grid(which='minor', color='w', linestyle='-', linewidth=2)
+        # Remove minor ticks
+        ax.tick_params(which='minor', bottom=False, left=False)
+        if not hide_values:
+            #plot value text in grid
+            action_range = np.max(action_grid)-np.min(action_grid)
+            min_action = np.min(action_grid)
+            for (x,y), act in np.ndenumerate(action_grid):
+                #change font color if background too dark
+                
+                c="black" if act-min_action>action_range/10 else "white"
+                #plot value at grid location
+                ax.text(y,x,"{:d}".format(act),
+                        color=c,
+                        horizontalalignment="center",
+                        verticalalignment="center",
+                        fontsize = valueFontSize)
+        else:
+            plt.colorbar()
+
     plt.draw()

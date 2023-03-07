@@ -72,6 +72,7 @@ def SARSAGridworld(alf=0.5,epsi=0.1,discount=0.95,max_episodes=5000):
     # Create environment
     env = gridworld.GridWorld(hard_version=False)
 
+
     Q, logs = SARSA(env,alf,epsi,discount,max_episodes)
     policy = QtoPolicy(env,Q)
     V = TD0ValueEstimate(env,policy,alf,discount,1000)
@@ -79,14 +80,17 @@ def SARSAGridworld(alf=0.5,epsi=0.1,discount=0.95,max_episodes=5000):
 
 
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    figsubdirs = "figures/gridworld/"
     alf = 0.5           #learning step size
     epsi = .1           #exploration chance
     discount = 0.95     #future state pair value disc"ount
     env,Q,policy,V,logs = SARSAGridworld(alf,epsi,discount,3000)
-    plot_gridworld(V,policy,(5,-1),title="SARSA")
+    plot_gridworld(V,policy,(5,-1),title="SARSA Gridworld")
+    # plt.savefig(figsubdirs+"Test SARSA Gridworld Learned Value and Policy",bbox_inches='tight',dpi=200)
     log = runGridworldEpisode(env,policy)
     plotLog(log,title="SARSA Gridworld Trajectory")
     PlotLearningCurve(logs,title="SARSA Learning Curve")
-
+    plt.show()
 
 # %%

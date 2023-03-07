@@ -1,4 +1,5 @@
 
+# %%
 import numpy as np
 import discrete_pendulum
 from RLSharedFunctions import init_Q, epsilonGreedy, init_V, QtoPolicy, plot_gridworld, runPendulumEpisode, plotLog, PlotLearningCurve
@@ -97,12 +98,24 @@ def SARSAPendulum(n_theta=31,n_theta_dot=31,alf=0.15,epsi=0.8,discount=0.95,max_
     
     return (env,Q,policy,V,logs)
 
-if __name__ == '__main__':
-    n_theta = 31
-    n_theta_dot = 31
-    (env,Q,policy,V,logs) = SARSAPendulum(n_theta,n_theta_dot,alf=0.15,epsi=0.8,discount=0.95,max_episodes=2000)
-    plot_gridworld(V,policy,(n_theta,n_theta_dot),title="SARSA Pendulum Value Function",hide_values=True,plot_arrows=False)
+def attempt():
     log = runPendulumEpisode(env,policy)
     plotLog(log,title="SARSA Trained Agent Trajectory")
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    figsubdirs = "figures/pendulum/"
+    n_theta = 15
+    n_theta_dot = 21
+    alf = 0.2
+    epsi = 0.8
+    maxEps = 800
+    print("Alpha = {:.2f}, Epsilon = {:.2f}".format(alf,epsi))
+    (env,Q,policy,V,logs) = SARSAPendulum(n_theta,n_theta_dot,alf=alf,epsi=epsi,discount=0.95,max_episodes=maxEps)
+    plot_gridworld(V,policy,(n_theta,n_theta_dot),title="SARSA Pendulum Value Function",hide_values=False,plot_arrows=False,valueFontSize=4)
+    plt.savefig(figsubdirs+"Test SARSA Pendulum Learned Value and Policy",bbox='tight',dpi=200)
     PlotLearningCurve(logs,title="SARSA Learning Curve")
+    attempt()
+    plt.show()
 # %%
+
